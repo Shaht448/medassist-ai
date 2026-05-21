@@ -1,0 +1,25 @@
+# API Keys — NEVER upload this
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Audio files from Whisper
+*.mp3
+*.wav
+*.mp4
+
+# OS files
+.DS_Store
+Thumbs.db

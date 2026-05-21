@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MedAssist AI</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚕️</text></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --teal:       #0A5940;
+  --teal-mid:   #0F8060;
+  --teal-glow:  rgba(10,89,64,0.15);
+  --teal-light: #D4EEE4;
+  --teal-pale:  #EBF7F2;
+  --warm:       #FAFAF7;
+  --cream:      #F4F1EA;
+  --cream2:     #EDE9DF;
+  --border:     #E2DDD5;
+  --border2:    #CCC8BE;
+  --text:       #181816;
+  --muted:      #706D65;
+  --light:      #A39F97;
+  --serif:      'Lora', Georgia, serif;
+  --sans:       'DM Sans', system-ui, sans-serif;
+  --r:          14px;
+  --rl:         20px;
+  --rxl:        28px;
+}
+
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body { font-family: var(--sans); background: var(--warm); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+/* =====================================================
+   ANIMATIONS
+   ===================================================== */
+@keyframes fadeUp   { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+@keyframes slideIn  { from{opacity:0;transform:translateX(-20px)} to{opacity:1;transform:translateX(0)} }
+@keyframes pulse    { 0%,100%{transform:scale(1)}50%{transform:scale(1.05)} }
+@keyframes float    { 0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)} }
+@keyframes shimmer  { 0%{background-position:-200% 0}100%{background-position:200% 0} }
+@keyframes blink    { 0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)} }
+@keyframes spin     { to{transform:rotate(360deg)} }
+@keyframes glow     { 0%,100%{box-shadow:0 0 20px var(--teal-glow)}50%{box-shadow:0 0 40px rgba(10,89,64,0.3)} }
+
+.anim-up   { animation: fadeUp 0.5s ease both; }
+.anim-up-2 { animation: fadeUp 0.5s ease 0.1s both; }
+.anim-up-3 { animation: fadeUp 0.5s ease 0.2s both; }
+.anim-up-4 { animation: fadeUp 0.5s ease 0.3s both; }
+
+/* =====================================================
+   ONBOARDING
+   ===================================================== */
+#onboarding {
+  min-height: 100vh;
+  display: flex;
+  background: linear-gradient(135deg, #0A1F17 0%, #0C3024 40%, #0F4A35 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated background orbs */
+#onboarding::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(15,128,96,0.2) 0%, transparent 70%);
+  top: -200px; right: -200px;
+  border-radius: 50%;
+  animation: float 8s ease-in-out infinite;
+}
+
+#onboarding::after {
+  content: '';
+  position: absolute;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(10,89,64,0.15) 0%, transparent 70%);
+  bottom: -100px; left: -100px;
+  border-radius: 50%;
+  animation: float 10s ease-in-out infinite reverse;
+}
+
+.ob-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.ob-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.8);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+  margin-bottom: 28px;
+  width: fit-content;
+  backdrop-filter: blur(10px);
+}
+
+.ob-badge::before {
+  content: '';
+  width: 7px; height: 7px;
+  background: #4ECCA3;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.ob-left h1 {
+  font-family: var(--serif);
+  font-size: 58px;
+  font-weight: 600;
+  color: white;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.ob-left h1 em {
+  font-style: italic;
+  color: #4ECCA3;
+}
+
+.ob-left p {
+  font-size: 17px;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.7;
+  max-width: 460px;
+  margin-bottom: 40px;
+}
+
+.ob-features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ob-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255,255,255,0.75);
+  font-size: 14.5px;
+}
+
+.ob-feature .icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+/* Right panel — form */
+.ob-right {
+  width: 480px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.ob-card {
+  background: rgba(255,255,255,0.97);
+  border-radius: var(--rxl);
+  padding: 44px 40px;
+  width: 100%;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+  backdrop-filter: blur(20px);
+  animation: fadeUp 0.6s ease;
+}
+
+.ob-logo {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 32px;
+}
+
+.ob-logo .mk {
+  width: 46px; height: 46px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 4px 16px var(--teal-glow);
+  animation: glow 3s ease-in-out infinite;
+}
+
+.ob-logo-text h2 { font-family: var(--serif); font-size: 20px; font-weight: 600; }
+.ob-logo-text p  { font-size: 12.5px; color: var(--muted); margin-top: 1px; }
+
+.ob-steps { display: flex; gap: 6px; margin-bottom: 28px; }
+.ob-step  { height: 3px; flex: 1; border-radius: 2px; background: var(--border); transition: all 0.4s ease; }
+.ob-step.on { background: linear-gradient(90deg, var(--teal), var(--teal-mid)); }
+
+.ob-card h3 { font-family: var(--serif); font-size: 26px; font-weight: 600; margin-bottom: 6px; }
+.ob-sub     { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 28px; }
+
+/* Form fields */
+.field { margin-bottom: 18px; }
+.field label {
+  display: block; font-size: 13px; font-weight: 500;
+  margin-bottom: 7px; color: var(--text);
+}
+
+.field input {
+  width: 100%; padding: 12px 15px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  font-family: var(--sans); font-size: 14px;
+  color: var(--text); background: var(--warm);
+  outline: none; transition: all 0.2s ease;
+}
+
+.field input:focus {
+  border-color: var(--teal-mid); background: white;
+  box-shadow: 0 0 0 4px rgba(10,89,64,0.08);
+}
+
+.btn-primary {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+  color: white; border: none; border-radius: var(--r);
+  font-family: var(--sans); font-size: 15px; font-weight: 500;
+  cursor: pointer; transition: all 0.25s ease; margin-top: 6px;
+  position: relative; overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0; transition: opacity 0.2s;
+}
+
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--teal-glow); }
+.btn-primary:hover::after { opacity: 1; }
+.btn-primary:active { transform: translateY(0); }
+
+.disc-box {
+  background: #FFFBEB; border: 1px solid #FCD34D;
+  border-radius: 10px; padding: 12px 14px;
+  margin-top: 18px; font-size: 12px; color: #92400E; line-height: 1.6;
+}
+
+/* =====================================================
+   APP SHELL
+   ===================================================== */
+#app { display: none; min-height: 100vh; flex-direction: column; }
+
+/* TOPBAR */
+.topbar {
+  height: 62px; background: white;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 28px; gap: 8px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 1px 0 var(--border), 0 4px 16px rgba(0,0,0,0.04);
+}
+
+.topbar-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+
+.topbar-brand .mk {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+  box-shadow: 0 2px 8px var(--teal-glow);
+}
+
+.topbar-brand span {
+  font-family: var(--serif); font-size: 19px;
+  font-weight: 600; color: var(--text);
+}
+
+.topbar-nav { display: flex; gap: 2px; margin-left: 24px; }
+
+.nav-btn {
+  padding: 7px 14px; border: none; background: none;
+  border-radius: 10px; font-family: var(--sans); font-size: 13.5px;
+  color: var(--muted); cursor: pointer; transition: all 0.2s ease;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+  position: relative;
+}
+
+.nav-btn:hover { background: var(--teal-pale); color: var(--teal); }
+.nav-btn.active { background: var(--teal-pale); color: var(--teal); font-weight: 500; }
+
+.nav-btn.active::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 14px; right: 14px;
+  height: 2px; background: var(--teal); border-radius: 2px 2px 0 0;
+}
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+.user-chip {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px 6px 6px;
+  background: var(--cream); border: 1px solid var(--border);
+  border-radius: 24px; cursor: pointer; transition: all 0.2s ease;
+  font-size: 13px; color: var(--muted);
+}
+.user-chip:hover { background: var(--cream2); }
+
+.user-chip .av {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+  border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 12px; color: white; font-weight: 500;
+}
+
+/* APP BODY */
+.app-body {
+  flex: 1; display: flex;
+  max-width: 1180px; width: 100%;
+  margin: 0 auto; padding: 28px 24px; gap: 24px;
+}
+
+/* PAGES */
+.page { display: none; flex: 1; flex-direction: column; gap: 18px; }
+.page.active { display: flex; animation: fadeIn 0.3s ease; }
+
+.page-hd h2 {
+  font-family: var(--serif); font-size: 26px; font-weight: 600;
+  background: linear-gradient(135deg, var(--text), var(--teal));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.page-hd p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+/* CHAT PANEL */
+.chat-panel {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--rxl);
+  display: flex; flex-direction: column;
+  height: 540px; overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
+}
+.chat-panel:focus-within { box-shadow: 0 4px 32px rgba(10,89,64,0.12); }
+
+.chat-msgs {
+  flex: 1; overflow-y: auto; padding: 22px;
+  display: flex; flex-direction: column; gap: 16px;
+  scroll-behavior: smooth;
+}
+.chat-msgs::-webkit-scrollbar { width: 5px; }
+.chat-msgs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* WELCOME STATE */
+.chat-welcome {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; height: 100%;
+  text-align: center; gap: 12px; padding: 24px;
+}
+
+.chat-welcome .wi {
+  width: 68px; height: 68px;
+  background: linear-gradient(135deg, var(--teal-pale), var(--teal-light));
+  border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 30px; margin-bottom: 6px;
+  border: 2px solid var(--teal-light);
+  animation: float 4s ease-in-out infinite;
+}
+
+.chat-welcome h3 {
+  font-family: var(--serif); font-size: 20px;
+  font-weight: 600; color: var(--text);
+}
+
+.chat-welcome p {
+  font-size: 14px; color: var(--muted);
+  max-width: 360px; line-height: 1.65;
+}
+
+/* UPLOAD ZONE */
+.upload-zone {
+  border: 2px dashed var(--border2); border-radius: var(--r);
+  padding: 16px; text-align: center; cursor: pointer;
+  transition: all 0.25s ease; margin-top: 8px;
+  background: var(--cream);
+  position: relative; overflow: hidden;
+}
+
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--teal-mid);
+  background: var(--teal-pale);
+}
+
+.upload-zone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
+}
+
+.upload-zone .uz-icon { font-size: 24px; margin-bottom: 4px; }
+.upload-zone p { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.upload-zone strong { color: var(--teal); }
+
+/* EXAMPLE PILLS */
+.pills {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  justify-content: center; margin-top: 8px;
+}
+
+.pill {
+  padding: 7px 14px; border: 1.5px solid var(--border);
+  border-radius: 20px; background: white;
+  font-family: var(--sans); font-size: 12.5px;
+  color: var(--muted); cursor: pointer; transition: all 0.2s ease;
+}
+
+.pill:hover {
+  border-color: var(--teal-mid); color: var(--teal);
+  background: var(--teal-pale); transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--teal-glow);
+}
+
+/* MESSAGES */
+.msg { display: flex; flex-direction: column; max-width: 84%; animation: fadeUp 0.3s ease; }
+.msg.user      { align-self: flex-end; align-items: flex-end; }
+.msg.assistant { align-self: flex-start; align-items: flex-start; max-width: 92%; }
+
+.msg-who { font-size: 11px; color: var(--light); margin-bottom: 5px; letter-spacing: 0.01em; }
+
+.mode-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-family: var(--sans); font-weight: 500;
+  background: linear-gradient(135deg, var(--teal-pale), var(--teal-light));
+  color: var(--teal); border: 1px solid var(--teal-light);
+  padding: 3px 10px; border-radius: 20px; margin-bottom: 6px;
+}
+
+.bubble {
+  padding: 12px 16px; border-radius: var(--rl);
+  font-size: 14px; line-height: 1.72; word-break: break-word;
+  transition: all 0.2s ease;
+}
+
+.msg.user .bubble {
+  background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+  color: white; border-bottom-right-radius: 4px;
+  white-space: pre-wrap;
+  box-shadow: 0 4px 16px var(--teal-glow);
+}
+
+.msg.assistant .bubble {
+  background: white; color: var(--text);
+  border-bottom-left-radius: 4px;
+  border: 1px solid var(--border);
+  padding: 18px 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+
+/* FILE PREVIEW IN CHAT */
+.file-preview-msg {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--teal-pale); border: 1px solid var(--teal-light);
+  border-radius: var(--r); padding: 10px 14px;
+  font-size: 13px; color: var(--teal); margin-bottom: 6px;
+  max-width: 280px;
+}
+.file-preview-msg .fp-icon { font-size: 20px; }
+.file-preview-msg .fp-info { line-height: 1.4; }
+.file-preview-msg .fp-name { font-weight: 500; font-size: 13px; }
+.file-preview-msg .fp-size { font-size: 11.5px; color: var(--muted); }
+
+/* Image preview in chat */
+.img-preview-msg {
+  max-width: 260px; border-radius: var(--r);
+  overflow: hidden; border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 6px;
+}
+.img-preview-msg img { width: 100%; display: block; }
+
+/* FORMATTED RESPONSE */
+.res-heading {
+  font-family: var(--serif); font-size: 15px; font-weight: 600;
+  color: var(--teal); margin: 18px 0 9px;
+  padding-bottom: 6px; border-bottom: 2px solid var(--teal-light);
+  display: block; letter-spacing: -0.01em;
+}
+.res-heading:first-child { margin-top: 0; }
+
+.res-bullet {
+  padding: 4px 0 4px 20px; position: relative;
+  font-size: 13.5px; line-height: 1.68; color: var(--text);
+}
+.res-bullet::before {
+  content: ''; position: absolute; left: 6px; top: 11px;
+  width: 5px; height: 5px; background: var(--teal);
+  border-radius: 50%;
+}
+
+.res-bold { font-weight: 600; color: var(--text); }
+
+.res-danger {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #FEF2F2; color: #991B1B;
+  border: 1px solid #FCA5A5; padding: 2px 9px;
+  border-radius: 6px; font-size: 12px; font-weight: 600;
+}
+
+.res-note {
+  background: linear-gradient(135deg, var(--teal-pale), #E8F5EE);
+  border-left: 3px solid var(--teal); padding: 12px 16px;
+  border-radius: 0 10px 10px 0; font-size: 13px;
+  color: var(--muted); margin-top: 14px; line-height: 1.65;
+}
+
+.res-gap { height: 5px; display: block; }
+
+/* TYPING */
+.typing { display: flex; gap: 5px; align-items: center; padding: 14px 18px; }
+.typing span {
+  width: 7px; height: 7px; background: var(--teal-light);
+  border-radius: 50%; animation: blink 1.2s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+
+/* INPUT AREA */
+.chat-input-wrap {
+  border-top: 1px solid var(--border);
+  background: var(--warm);
+  padding: 0;
+}
+
+/* File selected bar */
+.file-bar {
+  display: none; align-items: center; gap: 10px;
+  padding: 10px 16px; background: var(--teal-pale);
+  border-bottom: 1px solid var(--teal-light);
+  font-size: 13px; color: var(--teal);
+}
+.file-bar.show { display: flex; }
+.file-bar .fb-icon { font-size: 18px; }
+.file-bar .fb-name { flex: 1; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-bar .fb-remove { cursor: pointer; font-size: 16px; color: var(--muted); padding: 2px 6px; border-radius: 6px; border: none; background: none; }
+.file-bar .fb-remove:hover { background: rgba(0,0,0,0.08); }
+
+/* Input row */
+.chat-input {
+  display: flex; gap: 10px; align-items: flex-end;
+  padding: 12px 16px; background: white;
+}
+
+.chat-input textarea {
+  flex: 1; border: 1.5px solid var(--border); border-radius: var(--r);
+  padding: 10px 14px; font-family: var(--sans); font-size: 14px;
+  resize: none; min-height: 42px; max-height: 130px; outline: none;
+  transition: all 0.2s ease; line-height: 1.5;
+  color: var(--text); background: var(--warm);
+}
+.chat-input textarea:focus {
+  border-color: var(--teal-mid); background: white;
+  box-shadow: 0 0 0 4px rgba(10,89,64,0.07);
+}
+
+.attach-btn {
+  width: 42px; height: 42px; background: var(--cream);
+  border: 1.5px solid var(--border); border-radius: var(--r);
+  cursor: pointer; color: var(--muted); font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.2s ease; position: relative; overflow: hidden;
+}
+.attach-btn:hover { background: var(--teal-pale); border-color: var(--teal-mid); color: var(--teal); }
+.attach-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+
+.send-btn {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+  border: none; border-radius: var(--r);
+  cursor: pointer; color: white; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.2s ease;
+  box-shadow: 0 4px 12px var(--teal-glow);
+}
+.send-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(10,89,64,0.3); }
+.send-btn:active { transform: translateY(0); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* SIDEBAR */
+.sidebar { width: 248px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px; }
+
+.card {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--rl); padding: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  transition: all 0.2s ease;
+}
+.card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+.card h4 {
+  font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.09em; color: var(--light); margin-bottom: 14px;
+}
+
+.card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+.tag {
+  display: inline-block; font-size: 11.5px;
+  background: linear-gradient(135deg, var(--teal-pale), var(--teal-light));
+  color: var(--teal); border: 1px solid var(--teal-light);
+  padding: 5px 11px; border-radius: 8px; font-weight: 500;
+}
+
+.stat {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.stat:last-of-type { border: none; }
+.stat .val { font-weight: 600; color: var(--teal); font-variant-numeric: tabular-nums; }
+
+.btn-out {
+  width: 100%; padding: 10px;
+  background: var(--warm); color: var(--teal);
+  border: 1.5px solid var(--teal-light); border-radius: var(--r);
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s ease; margin-top: 10px;
+}
+.btn-out:hover { background: var(--teal-pale); border-color: var(--teal-mid); transform: translateY(-1px); }
+.btn-out + .btn-out { margin-top: 7px; }
+
+.err-msg {
+  background: #FEF2F2; border: 1px solid #FCA5A5;
+  color: #991B1B; padding: 11px 15px;
+  border-radius: var(--r); font-size: 13px;
+  animation: fadeUp 0.3s ease;
+}
+
+/* DISCLAIMER */
+.disc-bar {
+  background: #FFFBEB; border-top: 1px solid #FCD34D;
+  padding: 9px 24px; text-align: center;
+  font-size: 12px; color: #92400E;
+}
+
+/* MODAL */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 200;
+  align-items: center; justify-content: center; padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.overlay.open { display: flex; }
+
+.modal {
+  background: white; border-radius: var(--rxl);
+  width: 100%; max-width: 440px; max-height: 90vh;
+  overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+  animation: fadeUp 0.25s ease;
+}
+
+.modal-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 26px 18px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: white;
+}
+.modal-hd h3 { font-family: var(--serif); font-size: 20px; font-weight: 600; }
+
+.modal-close {
+  width: 34px; height: 34px; border: none; background: var(--cream);
+  border-radius: 10px; cursor: pointer; font-size: 17px;
+  color: var(--muted); display: flex; align-items: center;
+  justify-content: center; transition: all 0.2s ease;
+}
+.modal-close:hover { background: var(--cream2); color: var(--text); }
+.modal-body { padding: 22px 26px 30px; }
+
+.set-sec { margin-bottom: 24px; }
+.set-sec h4 {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--light); margin-bottom: 14px;
+}
+.set-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+}
+.set-row:last-child { border: none; }
+.set-row input {
+  padding: 7px 11px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 13px; font-family: var(--sans); color: var(--text);
+  background: var(--warm); outline: none; width: 180px; transition: all 0.2s;
+}
+.set-row input:focus { border-color: var(--teal-mid); box-shadow: 0 0 0 3px rgba(10,89,64,0.08); }
+
+/* MOBILE */
+.mob-nav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  background: white; border-top: 1px solid var(--border);
+  padding: 6px 0 8px; z-index: 100;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.06);
+}
+.mob-nav-inner { display: flex; justify-content: space-around; }
+.mob-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 10px; border: none; background: none;
+  font-family: var(--sans); font-size: 10px; color: var(--muted); cursor: pointer;
+}
+.mob-btn .ic { font-size: 21px; }
+.mob-btn.active { color: var(--teal); }
+
+@media(max-width:900px) {
+  .ob-left { display: none; }
+  .ob-right { width: 100%; padding: 20px; }
+}
+@media(max-width:768px) {
+  .topbar-nav { display: none; }
+  .mob-nav    { display: block; }
+  .app-body   { flex-direction: column; padding: 16px 12px 88px; }
+  .sidebar    { width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .card       { flex: 1; min-width: 200px; }
+}
+</style>
+</head>
+<body>
+
+<!-- =====================================================
+     ONBOARDING
+     ===================================================== -->
+<div id="onboarding">
+
+  <!-- Left: hero content -->
+  <div class="ob-left">
+    <div class="ob-badge anim-up">AI-Powered Medical Intelligence</div>
+    <h1 class="anim-up-2">Your <em>medical</em><br>assistant,<br>reimagined.</h1>
+    <p class="anim-up-3">Five specialized NLP tools for symptom analysis, drug research, medical terminology, clinical documentation — and now, image & PDF analysis.</p>
+    <div class="ob-features anim-up-4">
+      <div class="ob-feature"><div class="icon">🔍</div>Symptom analysis with differential diagnosis</div>
+      <div class="ob-feature"><div class="icon">💊</div>Complete drug profiles & interaction checking</div>
+      <div class="ob-feature"><div class="icon">📄</div>Upload scans, reports & PDFs for AI analysis</div>
+      <div class="ob-feature"><div class="icon">📋</div>Generate SOAP notes & clinical documentation</div>
+    </div>
+  </div>
+
+  <!-- Right: login form -->
+  <div class="ob-right">
+    <div class="ob-card">
+      <div class="ob-logo">
+        <div class="mk">⚕️</div>
+        <div class="ob-logo-text">
+          <h2>MedAssist AI</h2>
+          <p>Intelligent medical assistant</p>
+        </div>
+      </div>
+      <div class="ob-steps">
+        <div class="ob-step on"></div>
+        <div class="ob-step on"></div>
+        <div class="ob-step on"></div>
+      </div>
+      <h3>Get started</h3>
+      <p class="ob-sub">Enter your name to personalize your experience. Your API key is configured server-side.</p>
+      <div class="field">
+        <label>Your name</label>
+        <input type="text" id="userName" placeholder="e.g. Alex" autocomplete="given-name" onkeydown="if(event.key==='Enter')startApp()"/>
+      </div>
+      <button class="btn-primary" onclick="startApp()">Open MedAssist AI →</button>
+      <div class="disc-box">⚠️ <strong>Medical disclaimer</strong> — For informational purposes only. Not a substitute for professional medical advice. Always consult a qualified healthcare provider.</div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     MAIN APP
+     ===================================================== -->
+<div id="app">
+
+  <header class="topbar">
+    <a class="topbar-brand" href="#">
+      <div class="mk">⚕️</div>
+      <span>MedAssist AI</span>
+    </a>
+    <nav class="topbar-nav">
+      <button class="nav-btn active" onclick="goPage('consult',this)">💬 Consult</button>
+      <button class="nav-btn"        onclick="goPage('symptoms',this)">🔍 Symptoms</button>
+      <button class="nav-btn"        onclick="goPage('drugs',this)">💊 Drug Info</button>
+      <button class="nav-btn"        onclick="goPage('terms',this)">📖 Med Terms</button>
+      <button class="nav-btn"        onclick="goPage('report',this)">📋 Report</button>
+      <button class="nav-btn"        onclick="goPage('scan',this)">🩻 Scan AI</button>
+    </nav>
+    <div class="topbar-right">
+      <div class="user-chip" onclick="openSettings()">
+        <div class="av" id="av">A</div>
+        <span id="topName">User</span>
+        <span style="font-size:12px;color:var(--light);margin-left:2px">⚙</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <!-- CONSULT -->
+    <div class="page active" id="page-consult">
+      <div class="page-hd"><h2>General Consultation</h2><p>Evidence-based answers to any medical question</p></div>
+      <div style="display:flex;gap:20px;flex:1">
+        <div style="flex:1">
+          <div class="chat-panel">
+            <div class="chat-msgs" id="msgs-consult">
+              <div class="chat-welcome">
+                <div class="wi">💬</div>
+                <h3>Ask me anything</h3>
+                <p>Conditions, causes, treatments, prevention, anatomy. You can also attach an image or PDF.</p>
+                <div class="pills">
+                  <button class="pill" onclick="pill('consult','What causes high blood pressure?')">High blood pressure causes</button>
+                  <button class="pill" onclick="pill('consult','Explain Type 2 Diabetes simply')">Type 2 Diabetes explained</button>
+                  <button class="pill" onclick="pill('consult','Early signs of a stroke?')">Early stroke signs</button>
+                  <button class="pill" onclick="pill('consult','How does the immune system work?')">How immunity works</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-wrap">
+              <div class="file-bar" id="fb-consult">
+                <span class="fb-icon" id="fb-icon-consult">📎</span>
+                <span class="fb-name" id="fb-name-consult"></span>
+                <button class="fb-remove" onclick="removeFile('consult')">✕</button>
+              </div>
+              <div class="chat-input">
+                <button class="attach-btn" title="Attach image or PDF">
+                  📎
+                  <input type="file" id="file-consult" accept="image/*,.pdf" onchange="fileSelected('consult',this)"/>
+                </button>
+                <textarea id="in-consult" placeholder="Ask a question or describe an uploaded file..." rows="1" onkeydown="onKey(event,'consult')" oninput="grow(this)"></textarea>
+                <button class="send-btn" id="sb-consult" onclick="send('consult')">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar">
+          <div class="card">
+            <h4>NLP Technique</h4>
+            <span class="tag">Zero-shot prompting</span>
+            <p style="margin-top:12px">Model follows role and rules from training knowledge. Supports image & PDF context via GPT-4o Vision.</p>
+          </div>
+          <div class="card">
+            <h4>Session</h4>
+            <div class="stat"><span>Messages</span><span class="val" id="ct-consult">0</span></div>
+            <div class="stat"><span>Model</span><span class="val">GPT-4o</span></div>
+            <button class="btn-out" onclick="clearChat('consult')">Clear chat</button>
+            <button class="btn-out" onclick="exportChat('consult')">📥 Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYMPTOMS -->
+    <div class="page" id="page-symptoms">
+      <div class="page-hd"><h2>Symptom Analyzer</h2><p>Structured differential analysis with ranked conditions and next steps</p></div>
+      <div style="display:flex;gap:20px;flex:1">
+        <div style="flex:1">
+          <div class="chat-panel">
+            <div class="chat-msgs" id="msgs-symptoms">
+              <div class="chat-welcome">
+                <div class="wi">🔍</div>
+                <h3>Describe your symptoms</h3>
+                <p>Include duration, severity, and related symptoms. Upload images of rashes, wounds, or relevant medical documents.</p>
+                <div class="pills">
+                  <button class="pill" onclick="pill('symptoms','Headache, light sensitivity, stiff neck')">Headache + light sensitivity</button>
+                  <button class="pill" onclick="pill('symptoms','Chest tightness and left arm tingling')">Chest tightness + arm pain</button>
+                  <button class="pill" onclick="pill('symptoms','Fever 101F, dry cough, fatigue for 4 days')">Fever + cough + fatigue</button>
+                  <button class="pill" onclick="pill('symptoms','Sharp lower right abdominal pain')">Lower right abdominal pain</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-wrap">
+              <div class="file-bar" id="fb-symptoms">
+                <span class="fb-icon" id="fb-icon-symptoms">📎</span>
+                <span class="fb-name" id="fb-name-symptoms"></span>
+                <button class="fb-remove" onclick="removeFile('symptoms')">✕</button>
+              </div>
+              <div class="chat-input">
+                <button class="attach-btn" title="Attach image or PDF">
+                  📎
+                  <input type="file" id="file-symptoms" accept="image/*,.pdf" onchange="fileSelected('symptoms',this)"/>
+                </button>
+                <textarea id="in-symptoms" placeholder="Describe symptoms, duration, severity..." rows="1" onkeydown="onKey(event,'symptoms')" oninput="grow(this)"></textarea>
+                <button class="send-btn" id="sb-symptoms" onclick="send('symptoms')">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar">
+          <div class="card">
+            <h4>NLP Technique</h4>
+            <span class="tag">Structured output prompting</span>
+            <p style="margin-top:12px">Exact schema: Summary → Differential → Red Flags → Next Steps. Consistent every time.</p>
+          </div>
+          <div class="card">
+            <h4>Session</h4>
+            <div class="stat"><span>Messages</span><span class="val" id="ct-symptoms">0</span></div>
+            <button class="btn-out" onclick="clearChat('symptoms')">Clear chat</button>
+            <button class="btn-out" onclick="exportChat('symptoms')">📥 Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DRUGS -->
+    <div class="page" id="page-drugs">
+      <div class="page-hd"><h2>Drug Information</h2><p>Full medication profiles — mechanism, uses, side effects, interactions</p></div>
+      <div style="display:flex;gap:20px;flex:1">
+        <div style="flex:1">
+          <div class="chat-panel">
+            <div class="chat-msgs" id="msgs-drugs">
+              <div class="chat-welcome">
+                <div class="wi">💊</div>
+                <h3>Look up any medication</h3>
+                <p>Enter a drug name or upload a prescription / medication label image.</p>
+                <div class="pills">
+                  <button class="pill" onclick="pill('drugs','Metformin uses and side effects')">Metformin</button>
+                  <button class="pill" onclick="pill('drugs','Lisinopril drug interactions')">Lisinopril interactions</button>
+                  <button class="pill" onclick="pill('drugs','Compare Ibuprofen vs Acetaminophen')">Ibuprofen vs Acetaminophen</button>
+                  <button class="pill" onclick="pill('drugs','Amoxicillin what is it used for?')">Amoxicillin</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-wrap">
+              <div class="file-bar" id="fb-drugs">
+                <span class="fb-icon" id="fb-icon-drugs">📎</span>
+                <span class="fb-name" id="fb-name-drugs"></span>
+                <button class="fb-remove" onclick="removeFile('drugs')">✕</button>
+              </div>
+              <div class="chat-input">
+                <button class="attach-btn" title="Attach image or PDF">
+                  📎
+                  <input type="file" id="file-drugs" accept="image/*,.pdf" onchange="fileSelected('drugs',this)"/>
+                </button>
+                <textarea id="in-drugs" placeholder="Enter medication name or upload label..." rows="1" onkeydown="onKey(event,'drugs')" oninput="grow(this)"></textarea>
+                <button class="send-btn" id="sb-drugs" onclick="send('drugs')">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar">
+          <div class="card">
+            <h4>NLP Technique</h4>
+            <span class="tag">Domain-constrained generation</span>
+            <p style="margin-top:12px">Locks the model into pharmacology domain, mirroring a standard drug monograph format.</p>
+          </div>
+          <div class="card">
+            <h4>Session</h4>
+            <div class="stat"><span>Messages</span><span class="val" id="ct-drugs">0</span></div>
+            <button class="btn-out" onclick="clearChat('drugs')">Clear chat</button>
+            <button class="btn-out" onclick="exportChat('drugs')">📥 Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TERMS -->
+    <div class="page" id="page-terms">
+      <div class="page-hd"><h2>Medical Terminology</h2><p>Decode complex jargon, lab values, and diagnoses into plain English</p></div>
+      <div style="display:flex;gap:20px;flex:1">
+        <div style="flex:1">
+          <div class="chat-panel">
+            <div class="chat-msgs" id="msgs-terms">
+              <div class="chat-welcome">
+                <div class="wi">📖</div>
+                <h3>Enter any medical term</h3>
+                <p>Definition, etymology, clinical context, and what it means as a patient. Upload a lab report for explanation.</p>
+                <div class="pills">
+                  <button class="pill" onclick="pill('terms','What does myocardial infarction mean?')">Myocardial infarction</button>
+                  <button class="pill" onclick="pill('terms','Explain a CBC blood test')">CBC blood test</button>
+                  <button class="pill" onclick="pill('terms','Tachycardia vs Bradycardia')">Tachycardia vs Bradycardia</button>
+                  <button class="pill" onclick="pill('terms','Benign vs malignant tumor')">Benign vs malignant</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-wrap">
+              <div class="file-bar" id="fb-terms">
+                <span class="fb-icon" id="fb-icon-terms">📎</span>
+                <span class="fb-name" id="fb-name-terms"></span>
+                <button class="fb-remove" onclick="removeFile('terms')">✕</button>
+              </div>
+              <div class="chat-input">
+                <button class="attach-btn" title="Attach image or PDF">
+                  📎
+                  <input type="file" id="file-terms" accept="image/*,.pdf" onchange="fileSelected('terms',this)"/>
+                </button>
+                <textarea id="in-terms" placeholder="Enter a medical term, lab value, or upload a report..." rows="1" onkeydown="onKey(event,'terms')" oninput="grow(this)"></textarea>
+                <button class="send-btn" id="sb-terms" onclick="send('terms')">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar">
+          <div class="card">
+            <h4>NLP Technique</h4>
+            <span class="tag">Chain-of-thought explanation</span>
+            <p style="margin-top:12px">Multi-step reasoning: definition → context → etymology → related terms → patient meaning.</p>
+          </div>
+          <div class="card">
+            <h4>Session</h4>
+            <div class="stat"><span>Messages</span><span class="val" id="ct-terms">0</span></div>
+            <button class="btn-out" onclick="clearChat('terms')">Clear chat</button>
+            <button class="btn-out" onclick="exportChat('terms')">📥 Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORT -->
+    <div class="page" id="page-report">
+      <div class="page-hd"><h2>Clinical Report Generator</h2><p>SOAP notes, H&P write-ups, discharge summaries, and more</p></div>
+      <div style="display:flex;gap:20px;flex:1">
+        <div style="flex:1">
+          <div class="chat-panel">
+            <div class="chat-msgs" id="msgs-report">
+              <div class="chat-welcome">
+                <div class="wi">📋</div>
+                <h3>Describe the clinical scenario</h3>
+                <p>Provide patient details and the document type. Upload existing notes to reformat.</p>
+                <div class="pills">
+                  <button class="pill" onclick="pill('report','SOAP note: 52yo female, chest pain')">SOAP — chest pain</button>
+                  <button class="pill" onclick="pill('report','H&P for new patient with Type 2 Diabetes')">H&P — diabetes</button>
+                  <button class="pill" onclick="pill('report','Discharge summary: appendectomy, uncomplicated')">Discharge summary</button>
+                  <button class="pill" onclick="pill('report','Progress note: post-op day 1, hip replacement')">Progress note</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-wrap">
+              <div class="file-bar" id="fb-report">
+                <span class="fb-icon" id="fb-icon-report">📎</span>
+                <span class="fb-name" id="fb-name-report"></span>
+                <button class="fb-remove" onclick="removeFile('report')">✕</button>
+              </div>
+              <div class="chat-input">
+                <button class="attach-btn" title="Attach image or PDF">
+                  📎
+                  <input type="file" id="file-report" accept="image/*,.pdf" onchange="fileSelected('report',this)"/>
+                </button>
+                <textarea id="in-report" placeholder="Describe the clinical scenario..." rows="1" onkeydown="onKey(event,'report')" oninput="grow(this)"></textarea>
+                <button class="send-btn" id="sb-report" onclick="send('report')">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar">
+          <div class="card">
+            <h4>NLP Technique</h4>
+            <span class="tag">Template-guided generation</span>
+            <p style="margin-top:12px">Naming a format (SOAP, H&P) activates the model's clinical documentation training.</p>
+          </div>
+          <div class="card">
+            <h4>Session</h4>
+            <div class="stat"><span>Messages</span><span class="val" id="ct-report">0</span></div>
+            <button class="btn-out" onclick="clearChat('report')">Clear chat</button>
+            <button class="btn-out" onclick="exportChat('report')">📥 Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCAN AI -->
+    <div class="page" id="page-scan">
+      <div class="page-hd"><h2>Scan & Document AI</h2><p>Upload medical images, scans, lab reports, or PDFs for AI analysis</p></div>
+      <div style="display:flex;gap:20px;flex:1">
+        <div style="flex:1">
+          <div class="chat-panel">
+            <div class="chat-msgs" id="msgs-scan">
+              <div class="chat-welcome">
+                <div class="wi">🩻</div>
+                <h3>Upload any medical file</h3>
+                <p>X-rays, MRI images, lab reports, prescriptions, blood work PDFs — upload and ask questions about them.</p>
+                <div class="upload-zone" id="drop-scan"
+                  ondragover="event.preventDefault();this.classList.add('drag-over')"
+                  ondragleave="this.classList.remove('drag-over')"
+                  ondrop="dropFile(event,'scan')">
+                  <input type="file" id="file-scan" accept="image/*,.pdf" onchange="fileSelected('scan',this)"/>
+                  <div class="uz-icon">📂</div>
+                  <p><strong>Click to upload</strong> or drag & drop<br>JPG, PNG, PDF up to 16MB</p>
+                </div>
+                <div class="pills" style="margin-top:12px">
+                  <button class="pill" onclick="document.getElementById('file-scan').click()">🩻 Upload X-Ray</button>
+                  <button class="pill" onclick="document.getElementById('file-scan').click()">🔬 Upload Lab Report</button>
+                  <button class="pill" onclick="document.getElementById('file-scan').click()">💊 Upload Prescription</button>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-wrap">
+              <div class="file-bar" id="fb-scan">
+                <span class="fb-icon" id="fb-icon-scan">📎</span>
+                <span class="fb-name" id="fb-name-scan"></span>
+                <button class="fb-remove" onclick="removeFile('scan')">✕</button>
+              </div>
+              <div class="chat-input">
+                <button class="attach-btn" title="Attach image or PDF">
+                  📎
+                  <input type="file" id="file-scan-input" accept="image/*,.pdf" onchange="fileSelected('scan',this)"/>
+                </button>
+                <textarea id="in-scan" placeholder="Ask about your uploaded file, or just upload and send..." rows="1" onkeydown="onKey(event,'scan')" oninput="grow(this)"></textarea>
+                <button class="send-btn" id="sb-scan" onclick="send('scan')">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar">
+          <div class="card">
+            <h4>Supported Files</h4>
+            <div class="stat"><span>🖼️ Images</span><span class="val">JPG, PNG</span></div>
+            <div class="stat"><span>📄 Documents</span><span class="val">PDF</span></div>
+            <div class="stat"><span>📦 Max size</span><span class="val">16 MB</span></div>
+          </div>
+          <div class="card">
+            <h4>NLP Technique</h4>
+            <span class="tag">Multimodal AI</span>
+            <p style="margin-top:12px">GPT-4o Vision reads images directly. PDFs are text-extracted then analyzed as structured context.</p>
+          </div>
+          <div class="card">
+            <h4>Session</h4>
+            <div class="stat"><span>Messages</span><span class="val" id="ct-scan">0</span></div>
+            <button class="btn-out" onclick="clearChat('scan')">Clear chat</button>
+            <button class="btn-out" onclick="exportChat('scan')">📥 Export</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="disc-bar">⚕️ For informational purposes only — not a substitute for professional medical advice. Always consult a qualified healthcare provider.</div>
+
+  <nav class="mob-nav">
+    <div class="mob-nav-inner">
+      <button class="mob-btn active" onclick="goPage('consult',this,true)"><span class="ic">💬</span>Consult</button>
+      <button class="mob-btn"        onclick="goPage('symptoms',this,true)"><span class="ic">🔍</span>Symptoms</button>
+      <button class="mob-btn"        onclick="goPage('drugs',this,true)"><span class="ic">💊</span>Drugs</button>
+      <button class="mob-btn"        onclick="goPage('terms',this,true)"><span class="ic">📖</span>Terms</button>
+      <button class="mob-btn"        onclick="goPage('scan',this,true)"><span class="ic">🩻</span>Scan</button>
+    </div>
+  </nav>
+
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <div class="modal-hd">
+      <h3>Settings</h3>
+      <button class="modal-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="set-sec">
+        <h4>Your profile</h4>
+        <div class="set-row"><label>Name</label><input type="text" id="sName" placeholder="Your name"/></div>
+      </div>
+      <div class="set-sec">
+        <h4>About</h4>
+        <div class="set-row"><label>Backend</label><span style="font-size:13px;color:var(--muted)">Python / Flask</span></div>
+        <div class="set-row"><label>AI Model</label><span style="font-size:13px;color:var(--muted)">GPT-4o Vision</span></div>
+        <div class="set-row"><label>File support</label><span style="font-size:13px;color:var(--muted)">Images + PDF</span></div>
+        <div class="set-row"><label>API Key</label><span style="font-size:13px;color:var(--muted)">.env — server-side</span></div>
+      </div>
+      <button class="btn-primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let USER = 'User';
+const MODES = {
+  consult:  { name:'General Consult',    icon:'💬' },
+  symptoms: { name:'Symptom Analyzer',   icon:'🔍' },
+  drugs:    { name:'Drug Info',          icon:'💊' },
+  terms:    { name:'Medical Terms',      icon:'📖' },
+  report:   { name:'Report Generator',   icon:'📋' },
+  scan:     { name:'Scan & Document AI', icon:'🩻' },
+};
+const histories  = { consult:[], symptoms:[], drugs:[], terms:[], report:[], scan:[] };
+const pendingFiles = { consult:null, symptoms:null, drugs:null, terms:null, report:null, scan:null };
+
+/* ── FORMAT MARKDOWN → CLEAN HTML ── */
+function fmt(text) {
+  const lines = text.split('\n');
+  let html = '';
+  lines.forEach((line, i) => {
+    const t = line.trim();
+    if (!t) { html += '<span class="res-gap"></span>'; return; }
+    if (t.startsWith('## ')) { html += `<span class="res-heading">${t.slice(3)}</span>`; return; }
+    if (t.startsWith('- ')) {
+      let c = t.slice(2)
+        .replace(/\*\*(.+?)\*\*/g, '<strong class="res-bold">$1</strong>')
+        .replace(/DANGEROUS:/g, '<span class="res-danger">⛔ DANGEROUS:</span>');
+      html += `<div class="res-bullet">${c}</div>`; return;
+    }
+    const isLast = i >= lines.length - 2;
+    let c = t
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="res-bold">$1</strong>')
+      .replace(/DANGEROUS:/g, '<span class="res-danger">⛔ DANGEROUS:</span>');
+    if (isLast && t.length > 20 && !t.startsWith('#')) {
+      html += `<div class="res-note">💡 ${c}</div>`;
+    } else {
+      html += `<p style="font-size:13.5px;line-height:1.68;margin:3px 0">${c}</p>`;
+    }
+  });
+  return html;
+}
+
+/* ── ONBOARDING ── */
+function startApp() {
+  USER = document.getElementById('userName').value.trim() || 'User';
+  document.getElementById('topName').textContent = USER;
+  document.getElementById('av').textContent = USER[0].toUpperCase();
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+}
+
+/* ── NAVIGATION ── */
+function goPage(id, btn, mobile=false) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-btn,.mob-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const pages = ['consult','symptoms','drugs','terms','report','scan'];
+  const idx   = pages.indexOf(id);
+  const other = mobile ? document.querySelectorAll('.nav-btn') : document.querySelectorAll('.mob-btn');
+  if (other[idx]) other[idx].classList.add('active');
+}
+
+/* ── FILE HANDLING ── */
+function fileSelected(mode, input) {
+  const file = input.files[0];
+  if (!file) return;
+  pendingFiles[mode] = file;
+
+  const isImg = file.type.startsWith('image/');
+  const bar   = document.getElementById('fb-'+mode);
+  const icon  = document.getElementById('fb-icon-'+mode);
+  const name  = document.getElementById('fb-name-'+mode);
+
+  icon.textContent = isImg ? '🖼️' : '📄';
+  name.textContent = file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
+  bar.classList.add('show');
+}
+
+function removeFile(mode) {
+  pendingFiles[mode] = null;
+  const inp = document.getElementById('file-'+mode) || document.getElementById('file-'+mode+'-input');
+  if (inp) inp.value = '';
+  document.getElementById('fb-'+mode).classList.remove('show');
+}
+
+function dropFile(e, mode) {
+  e.preventDefault();
+  document.getElementById('drop-'+mode)?.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  pendingFiles[mode] = file;
+  const bar  = document.getElementById('fb-'+mode);
+  const icon = document.getElementById('fb-icon-'+mode);
+  const name = document.getElementById('fb-name-'+mode);
+  icon.textContent = file.type.startsWith('image/') ? '🖼️' : '📄';
+  name.textContent = file.name + ' (' + (file.size/1024).toFixed(1) + ' KB)';
+  bar.classList.add('show');
+}
+
+/* ── PILLS / KEY HANDLER ── */
+function pill(mode, text) { document.getElementById('in-'+mode).value = text; send(mode); }
+function onKey(e, mode)   { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();send(mode);} }
+function grow(el)          { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,130)+'px'; }
+
+/* ── SEND MESSAGE ── */
+async function send(mode) {
+  const inp  = document.getElementById('in-'+mode);
+  const btn  = document.getElementById('sb-'+mode);
+  const box  = document.getElementById('msgs-'+mode);
+  const text = inp.value.trim();
+  const file = pendingFiles[mode];
+
+  if (!text && !file) return;
+  if (btn.disabled) return;
+
+  // Remove welcome screen
+  const w = box.querySelector('.chat-welcome');
+  if (w) w.remove();
+
+  inp.value=''; inp.style.height='auto'; btn.disabled=true;
+
+  // Show user message + file preview
+  showUserMsg(box, text, file, mode);
+
+  // Track in history (text only — file sent via FormData)
+  const userContent = text || (file ? `[Uploaded: ${file.name}]` : '');
+  histories[mode].push({role:'user', content: userContent});
+  updateCount(mode);
+
+  // Typing indicator
+  const typ = document.createElement('div');
+  typ.className='msg assistant'; typ.id='typ-'+mode;
+  typ.innerHTML='<div class="bubble" style="background:var(--cream);border:1px solid var(--border)"><div class="typing"><span></span><span></span><span></span></div></div>';
+  box.appendChild(typ); scrollEnd(box);
+
+  try {
+    // Build FormData — supports both text and file
+    const fd = new FormData();
+    fd.append('mode', mode);
+    fd.append('user_text', text);
+    fd.append('messages', JSON.stringify(
+      histories[mode].slice(0,-1).map(m=>({role:m.role,content:m.content}))
+    ));
+    if (file) fd.append('file', file);
+
+    const res  = await fetch('/api/chat', { method:'POST', body:fd });
+    const data = await res.json();
+    document.getElementById('typ-'+mode)?.remove();
+
+    if (data.error) {
+      addErr(box, data.error);
+      histories[mode].pop();
+    } else {
+      histories[mode].push({role:'assistant', content:data.reply});
+      addAssistantMsg(box, data.reply, mode);
+      updateCount(mode);
+    }
+
+  } catch(err) {
+    document.getElementById('typ-'+mode)?.remove();
+    addErr(box, 'Could not reach the server. Is Flask running?');
+    histories[mode].pop();
+  }
+
+  // Clear file
+  removeFile(mode);
+  btn.disabled=false; scrollEnd(box); inp.focus();
+}
+
+function showUserMsg(box, text, file, mode) {
+  const d = document.createElement('div');
+  d.className = 'msg user';
+  const who = document.createElement('div');
+  who.className = 'msg-who'; who.textContent = USER;
+  d.appendChild(who);
+
+  // Show image preview if image file
+  if (file && file.type.startsWith('image/')) {
+    const prev = document.createElement('div');
+    prev.className = 'img-preview-msg';
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    img.alt = file.name;
+    prev.appendChild(img);
+    d.appendChild(prev);
+  } else if (file) {
+    // Show PDF/file chip
+    const chip = document.createElement('div');
+    chip.className = 'file-preview-msg';
+    chip.innerHTML = `<span class="fp-icon">📄</span><div class="fp-info"><div class="fp-name">${file.name}</div><div class="fp-size">${(file.size/1024).toFixed(1)} KB</div></div>`;
+    d.appendChild(chip);
+  }
+
+  // Text bubble
+  if (text) {
+    const bub = document.createElement('div');
+    bub.className = 'bubble'; bub.textContent = text;
+    d.appendChild(bub);
+  }
+
+  box.appendChild(d); scrollEnd(box);
+}
+
+function addAssistantMsg(box, text, mode) {
+  const d = document.createElement('div');
+  d.className = 'msg assistant';
+  const tag = document.createElement('div');
+  tag.className = 'mode-tag';
+  tag.textContent = `${MODES[mode].icon} ${MODES[mode].name}`;
+  const who = document.createElement('div');
+  who.className = 'msg-who'; who.textContent = 'MedAssist AI';
+  const bub = document.createElement('div');
+  bub.className = 'bubble'; bub.innerHTML = fmt(text);
+  d.appendChild(tag); d.appendChild(who); d.appendChild(bub);
+  box.appendChild(d); scrollEnd(box);
+}
+
+function addErr(box, msg) {
+  const d = document.createElement('div');
+  d.className = 'err-msg'; d.textContent = '❌ ' + msg;
+  box.appendChild(d); scrollEnd(box);
+}
+
+function scrollEnd(el) { setTimeout(()=>el.scrollTop=el.scrollHeight, 50); }
+function updateCount(mode) { document.getElementById('ct-'+mode).textContent = histories[mode].length; }
+
+function clearChat(mode) {
+  if (!confirm('Clear this conversation?')) return;
+  histories[mode] = [];
+  removeFile(mode);
+  const cfg = {
+    consult: {ic:'💬',t:'Ask me anything',d:'Conditions, causes, treatments, prevention, anatomy.'},
+    symptoms:{ic:'🔍',t:'Describe your symptoms',d:'Include duration, severity, and related symptoms.'},
+    drugs:   {ic:'💊',t:'Look up any medication',d:'Enter a drug name or upload a prescription label.'},
+    terms:   {ic:'📖',t:'Enter any medical term',d:'Definition, etymology, clinical context, and patient guidance.'},
+    report:  {ic:'📋',t:'Describe the scenario',d:'Provide patient details and the document type you need.'},
+    scan:    {ic:'🩻',t:'Upload any medical file',d:'X-rays, MRI images, lab reports, prescriptions, blood work PDFs.'},
+  }[mode];
+  document.getElementById('msgs-'+mode).innerHTML =
+    `<div class="chat-welcome"><div class="wi">${cfg.ic}</div><h3>${cfg.t}</h3><p>${cfg.d}</p></div>`;
+  document.getElementById('ct-'+mode).textContent = '0';
+}
+
+function exportChat(mode) {
+  if (!histories[mode].length) { alert('No messages to export.'); return; }
+  const lines = ['='.repeat(55), `  MedAssist AI — ${MODES[mode].name}`, `  ${new Date().toLocaleString()}`, '='.repeat(55), ''];
+  histories[mode].forEach(m => { lines.push(`[${m.role==='user'?USER:'MedAssist AI'}]`); lines.push(m.content); lines.push(''); });
+  lines.push('For informational purposes only.');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain'}));
+  a.download = `medassist_${mode}.txt`; a.click();
+}
+
+/* ── SETTINGS ── */
+function openSettings()  { document.getElementById('sName').value=USER; document.getElementById('settingsModal').classList.add('open'); }
+function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
+function saveSettings()  {
+  USER = document.getElementById('sName').value.trim()||USER;
+  document.getElementById('topName').textContent=USER;
+  document.getElementById('av').textContent=USER[0].toUpperCase();
+  closeSettings();
+}
+</script>
+</body>
+</html>
