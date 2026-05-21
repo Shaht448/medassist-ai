@@ -8,7 +8,7 @@ from io import BytesIO
 
 load_dotenv()
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 SYSTEM_PROMPTS = {
     "consult": """You are MedAssist AI, a knowledgeable medical information assistant.
@@ -114,10 +114,22 @@ def index():
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    mode     = request.form.get("mode", "consult")
+    # WHY READ API KEY FROM REQUEST?
+    # The client sends their own OpenAI key with every request.
+    # It never gets stored on the server — used once and discarded.
+    # This means you don't need to put any key in .env or Render.
+    api_key = request.form.get("api_key", "").strip()
+
+    if not api_key:
+        return jsonify({"error": "No API key provided. Please enter your OpenAI key on the settings screen."}), 401
+
+    if not api_key.startswith("sk-"):
+        return jsonify({"error": "Invalid API key format. OpenAI keys start with sk-"}), 401
+
+    mode          = request.form.get("mode", "consult")
     messages_json = request.form.get("messages", "[]")
-    user_text = request.form.get("user_text", "")
-    file      = request.files.get("file")
+    user_text     = request.form.get("user_text", "")
+    file          = request.files.get("file")
 
     import json
     messages = json.loads(messages_json)
@@ -125,33 +137,21 @@ def chat():
     if mode not in SYSTEM_PROMPTS:
         return jsonify({"error": f"Unknown mode: {mode}"}), 400
 
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        return jsonify({"error": "OPENAI_API_KEY not set in .env file"}), 500
-
     try:
+        # Use the CLIENT's API key — not a server key
         client = OpenAI(api_key=api_key)
-        model  = os.getenv("OPENAI_MODEL", "gpt-4o")
+        model  = "gpt-4o"
 
-        # ── Build the current user message content ──────────
-        # Handles three cases:
-        # 1. Text only → plain string
-        # 2. Image file → base64 encoded + text
-        # 3. PDF file  → extracted text + user question
-
+        # Build user message content
         if file and file.filename:
             ext = file.filename.rsplit('.', 1)[-1].lower()
 
             if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']:
-                # IMAGE: encode to base64 and send to GPT-4o vision
-                file_bytes  = file.read()
-                b64_image   = base64.b64encode(file_bytes).decode('utf-8')
-                mime_map    = {'jpg':'jpeg','jpeg':'jpeg','png':'png','gif':'gif','webp':'webp','bmp':'bmp'}
-                mime_type   = f"image/{mime_map.get(ext, 'jpeg')}"
-
+                file_bytes = file.read()
+                b64_image  = base64.b64encode(file_bytes).decode('utf-8')
+                mime_map   = {'jpg':'jpeg','jpeg':'jpeg','png':'png','gif':'gif','webp':'webp','bmp':'bmp'}
+                mime_type  = f"image/{mime_map.get(ext, 'jpeg')}"
                 prompt_text = user_text if user_text else "Please analyze this medical image and explain what you see."
-
-                # OpenAI vision format: content is a list with image + text
                 current_content = [
                     {"type": "image_url", "image_url": {
                         "url": f"data:{mime_type};base64,{b64_image}",
@@ -161,7 +161,6 @@ def chat():
                 ]
 
             elif ext == 'pdf':
-                # PDF: extract text with pdfplumber then send as context
                 file_bytes = file.read()
                 pdf_text   = ""
                 with pdfplumber.open(BytesIO(file_bytes)) as pdf:
@@ -176,16 +175,11 @@ def chat():
                 prompt_text = user_text if user_text else "Please analyze this medical document and explain the key findings."
                 combined    = f"{prompt_text}\n\n--- DOCUMENT CONTENT ---\n{pdf_text[:6000]}"
                 current_content = combined
-
             else:
                 return jsonify({"error": "Unsupported file type. Please upload JPG, PNG, or PDF."}), 400
-
         else:
-            # Text only — normal chat
             current_content = user_text
 
-        # ── Build full message list ──────────────────────────
-        # Previous conversation history + new user message
         openai_messages = [
             {"role": "system", "content": SYSTEM_PROMPTS[mode]},
             *messages,
@@ -203,8 +197,12 @@ def chat():
 
     except Exception as e:
         err = str(e)
-        if "401" in err: return jsonify({"error": "Invalid API key."}), 401
-        if "429" in err: return jsonify({"error": "Rate limit hit. Wait a moment."}), 429
+        if "401" in err or "invalid_api_key" in err:
+            return jsonify({"error": "Invalid API key. Please check your key and try again."}), 401
+        if "429" in err:
+            return jsonify({"error": "Rate limit hit. Please wait a moment and try again."}), 429
+        if "insufficient_quota" in err:
+            return jsonify({"error": "Your OpenAI account has no credits. Add credits at platform.openai.com"}), 402
         return jsonify({"error": f"Error: {err}"}), 500
 
 
